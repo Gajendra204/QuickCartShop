@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import {Button, TextInput, Title} from 'react-native-paper';
 import {shopkeeperService} from '../services/api';
@@ -10,6 +10,12 @@ const LoginScreen = ({navigation}: any) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const {login, isLoading} = useAuth();
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigation.replace('Dashboard');
+    }
+  }, [isAuthenticated, navigation]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -20,13 +26,12 @@ const LoginScreen = ({navigation}: any) => {
     setLoading(true);
     try {
       await login(email, password);
-      const response = await shopkeeperService.login({email, password});
+      // const response = await shopkeeperService.login({email, password});
       console.log(
-        "After login setting the token here with key 'token' >>> ",
-        response.data.token,
+        "After login setting the token here with key 'token' >>> "
       );
       // Store the token (use AsyncStorage in a real app)
-      await AsyncStorage.setItem('token', response.data.token);
+      // await AsyncStorage.setItem('token', response.data.token);
       navigation.navigate('Dashboard');
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Login failed');
