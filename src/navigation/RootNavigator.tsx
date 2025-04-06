@@ -5,7 +5,11 @@ import {useAuth} from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import DashboardScreen from '../screens/DashboardScreen';
+import CreateStoreScreen from '../screens/CreateStoreScreen';
+import CreateCategoryScreen from '../screens/CreateCategoryScreen';
+import CreateItemScreen from '../screens/CreateItemScreen';
 import {ActivityIndicator, View} from 'react-native';
+import OrdersScreen from '../screens/OrdersScreen';
 
 const Stack = createStackNavigator();
 
@@ -27,22 +31,44 @@ const RootNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator>
         {isAuthenticated ? (
-          <Stack.Screen
-            name="Dashboard"
-            component={DashboardScreen}
-            options={{headerShown: false}}
-          />
+          <>
+            <Stack.Screen
+              name="Dashboard"
+              component={DashboardScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="CreateStore"
+              component={CreateStoreScreen}
+              options={{ headerShown: true }}
+            />
+            <Stack.Screen
+              name="CreateCategory"
+              component={CreateCategoryScreen}
+              options={{ headerShown: true }}
+            />
+            <Stack.Screen
+              name="CreateItem"
+              component={CreateItemScreen}
+              options={{ headerShown: true }}
+            />
+            <Stack.Screen 
+        name="Orders" 
+        component={OrdersScreen} 
+        options={{ title: 'All Orders' }}
+      />
+          </>
         ) : (
           <>
             <Stack.Screen
               name="Login"
               component={LoginScreen}
-              options={{headerShown: false}}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="Register"
               component={RegisterScreen}
-              options={{headerShown: false}}
+              options={{ headerShown: false }}
             />
           </>
         )}

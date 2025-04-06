@@ -37,11 +37,26 @@ const DashboardScreen = ({navigation}: any) => {
       </Button>
 
       <Button
+        mode="contained"
+        onPress={() => navigation.navigate('Orders')}
+        style={styles.button}>
+        View Orders
+      </Button>
+
+      <Button
         mode="outlined"
         onPress={async () => {
-          // Clear auth token and navigate to login
-          await AsyncStorage.removeItem('token');
-          navigation.navigate('Login');
+          try {
+            // Clear auth token
+            await AsyncStorage.removeItem('token');
+            // Navigate to Login screen
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'Login'}],
+            });
+          } catch (error) {
+            console.error('Error during logout:', error);
+          }
         }}
         style={styles.button}>
         Logout

@@ -11,13 +11,11 @@ const api = axios.create({
 // Add a request interceptor to include the token
 api.interceptors.request.use(async(config) => {
   const token =  await AsyncStorage.getItem('token'); // or use AsyncStorage for mobile
+  console.log("Token in request interceptor:", token);
   if (token) {
-    console.log("coming here", token);
-    
     config.headers.Authorization = `Bearer ${token}`;
   }
   console.log("config", config);
-  
   return config;
 });
 
@@ -103,7 +101,7 @@ export const shopkeeperService = {
       const response = await api.post('/categories', data)
       return response;
     } catch (error) {
-      console.error("Register error:", error);
+      console.error("categories error:", error);
       if (axios.isAxiosError(error)) {
         console.error("Axios error details:", {
           message: error.message,
@@ -114,8 +112,59 @@ export const shopkeeperService = {
       throw error;
      }
   },
-    
   
+  getAllOrders: async() => {
+    try{
+      const response = await api.get('/orders')
+      return response;
+    }catch(error){
+      console.error("get all orders error:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", {
+          message: error.message,
+          code: error.code,
+          response: error.response,
+        });
+      }
+      throw error;
+     }
+  },
+
+  updateOrderStatus: async (orderId: string, status: string) => {
+    try {
+      // Validate orderId format
+      const isValidObjectId = (id: string) => /^[a-fA-F0-9]{24}$/.test(id);
+      if (!isValidObjectId(orderId)) {
+        throw new Error(`Invalid orderId format: ${orderId}`);
+      }
+  
+      // Validate status value
+      const validStatuses = ["Pending", "Processing", "Completed", "Cancelled"];
+      if (!validStatuses.includes(status)) {
+        throw new Error(`Invalid status value: ${status}`);
+      }
+  
+      console.log("Updating order status with payload:", { orderId, status });
+  
+      // Make the API call
+      const response = await api.patch(`/orders/${orderId}`, { status });
+      console.log("Update order status response:", response.data);
+      return response;
+    } catch (error) {
+      console.error("Update order status error:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", {
+          message: error.message,
+          code: error.code,
+          response: error.response?.data, // Log server response
+          headers: error.response?.headers,
+          status: error.response?.status,
+        });
+      }
+      throw error;
+    }
+  },
+
   createItem: (data: { 
     name: string; 
     description: string; 
@@ -125,3 +174,5 @@ export const shopkeeperService = {
     store: string 
   }) => api.post('/items', data),
 };
+
+
