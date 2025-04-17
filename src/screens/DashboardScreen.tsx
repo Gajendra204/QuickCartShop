@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {Button, Card, Title, Paragraph} from 'react-native-paper';
+import {Button, Card, Title} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardScreen = ({navigation}: any) => {
@@ -11,9 +11,15 @@ const DashboardScreen = ({navigation}: any) => {
       <Card style={styles.card}>
         <Card.Content>
           <Title>Manage Your Business</Title>
-          <Paragraph>Access all shop management features from here</Paragraph>
         </Card.Content>
       </Card>
+
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('Stores')}
+        style={styles.button}>
+        View All Stores
+      </Button>
 
       <Button
         mode="contained"
@@ -47,9 +53,7 @@ const DashboardScreen = ({navigation}: any) => {
         mode="outlined"
         onPress={async () => {
           try {
-            // Clear auth token
             await AsyncStorage.removeItem('token');
-            // Navigate to Login screen
             navigation.reset({
               index: 0,
               routes: [{name: 'Login'}],

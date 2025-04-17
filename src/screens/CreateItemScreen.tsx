@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Button, TextInput, Title } from 'react-native-paper';
-import { shopkeeperService } from '../services/api';
+import React, {useState} from 'react';
+import {View, StyleSheet, Alert} from 'react-native';
+import {Button, TextInput, Title} from 'react-native-paper';
+import {shopkeeperService} from '../services/api';
 
-const CreateItemScreen = ({ navigation }: any) => {
+const CreateItemScreen = ({navigation, route}: any) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [mrp, setMrp] = useState('');
   const [discount, setDiscount] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const storeId = route.params?.storeId;
+  const categoryId = route.params?.categoryId;
 
   const handleCreateItem = async () => {
     if (!name || !description || !mrp || !discount) {
@@ -18,23 +21,22 @@ const CreateItemScreen = ({ navigation }: any) => {
 
     setLoading(true);
     try {
-      // These IDs should come from navigation params or state management
-      const storeId = '67b17fc5b9ef7445674e715c'; // Replace with actual store ID
-      const categoryId = '67b70a1a9d7a9e5be49cea6c'; // Replace with actual category ID
-      
-      await shopkeeperService.createItem({ 
+      await shopkeeperService.createItem({
         name,
         description,
         mrp: parseFloat(mrp),
         discount: parseFloat(discount),
         category: categoryId,
-        store: storeId
+        store: storeId,
       });
-      
+
       Alert.alert('Success', 'Item created successfully!');
       navigation.navigate('Dashboard');
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to create item');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to create item',
+      );
     } finally {
       setLoading(false);
     }
@@ -69,12 +71,11 @@ const CreateItemScreen = ({ navigation }: any) => {
         keyboardType="numeric"
         style={styles.input}
       />
-      <Button 
-        mode="contained" 
+      <Button
+        mode="contained"
         onPress={handleCreateItem}
         loading={loading}
-        style={styles.button}
-      >
+        style={styles.button}>
         Create Item
       </Button>
     </View>

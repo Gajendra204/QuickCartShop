@@ -99,6 +99,12 @@ const OrdersScreen = () => {
             style={styles.button}>
             Complete
           </Button>
+          <Button
+            mode={item.status === 'Cancelled' ? 'contained' : 'outlined'}
+            onPress={() => handleUpdateStatus(item._id, 'Cancelled')}
+            style={styles.button}>
+            Cancelled
+          </Button>
         </View>
       </Card.Content>
     </Card>
@@ -144,9 +150,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
+    flexWrap: 'wrap',
   },
   button: {
-    margin: 2,
+    margin: 5,
+    flexGrow: 1,
   },
   loader: {
     flex: 1,

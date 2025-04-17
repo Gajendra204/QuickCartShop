@@ -1,27 +1,28 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {useAuth} from '../context/AuthContext';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { useAuth } from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import CreateStoreScreen from '../screens/CreateStoreScreen';
 import CreateCategoryScreen from '../screens/CreateCategoryScreen';
 import CreateItemScreen from '../screens/CreateItemScreen';
-import {ActivityIndicator, View} from 'react-native';
 import OrdersScreen from '../screens/OrdersScreen';
+import StoresScreen from '../screens/StoresScreen';
+import CategoriesScreen from '../screens/CategoriesScreen';
+import ItemsScreen from '../screens/ItemsScreen';
+import { ActivityIndicator, View } from 'react-native';
+import { RootStackParamList } from '../types/navigation';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
-  const {isAuthenticated, token, isLoading} = useAuth();
-  console.log(
-    `Auth State - isAuthenticated: ${isAuthenticated}, isLoading: ${isLoading}, token: ${token}`,
-  );
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -38,25 +39,44 @@ const RootNavigator = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="Stores"
+              component={StoresScreen}
+              options={{ title: 'Your Stores' }}
+            />
+            <Stack.Screen
+              name="Categories"
+              component={CategoriesScreen}
+              options={({ route }) => ({ 
+                title: `Categories in ${route.params.storeName}` 
+              })}
+            />
+            <Stack.Screen
+              name="Items"
+              component={ItemsScreen}
+              options={({ route }) => ({ 
+                title: `${route.params.categoryName} Items` 
+              })}
+            />
+            <Stack.Screen
               name="CreateStore"
               component={CreateStoreScreen}
-              options={{ headerShown: true }}
+              options={{ title: 'Create New Store' }}
             />
             <Stack.Screen
               name="CreateCategory"
               component={CreateCategoryScreen}
-              options={{ headerShown: true }}
+              options={{ title: 'Create New Category' }}
             />
             <Stack.Screen
               name="CreateItem"
               component={CreateItemScreen}
-              options={{ headerShown: true }}
+              options={{ title: 'Create New Item' }}
             />
             <Stack.Screen 
-        name="Orders" 
-        component={OrdersScreen} 
-        options={{ title: 'All Orders' }}
-      />
+              name="Orders" 
+              component={OrdersScreen} 
+              options={{ title: 'All Orders' }}
+            />
           </>
         ) : (
           <>

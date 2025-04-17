@@ -1,32 +1,39 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Button, TextInput, Title } from 'react-native-paper';
-import { shopkeeperService } from '../services/api';
+import React, {useState} from 'react';
+import {View, StyleSheet, Alert} from 'react-native';
+import {Button, TextInput, Title} from 'react-native-paper';
+import {shopkeeperService} from '../services/api';
+import {useAuth} from '../context/AuthContext';
 
-const CreateStoreScreen = ({ navigation }: any) => {
+const CreateStoreScreen = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const {userId} = useAuth();
 
   const handleCreateStore = async () => {
     if (!name || !address) {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
+    if (!userId) {
+      Alert.alert('Error', 'User ID not found. Please log in again.');
+      return;
+    }
 
     setLoading(true);
     try {
-      // In a real app, you'd get the shopkeeper ID from your auth state
-      const shopkeeperId = '67d3f8c0e073e713ac829b50'; // This should come from your auth context
-      await shopkeeperService.createStore({ 
-        name, 
-        address, 
-        shopkeeper: { id: shopkeeperId } 
+      const response = await shopkeeperService.createStore({
+        name,
+        address,
+        shopkeeper: {id: userId},
       });
       Alert.alert('Success', 'Store created successfully!');
-      navigation.navigate('CreateCategory');
+      navigation.navigate('CreateCategory', {storeId: response.data._id}); // Pass the new store ID
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to create store');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to create store',
+      );
     } finally {
       setLoading(false);
     }
@@ -47,12 +54,11 @@ const CreateStoreScreen = ({ navigation }: any) => {
         onChangeText={setAddress}
         style={styles.input}
       />
-      <Button 
-        mode="contained" 
+      <Button
+        mode="contained"
         onPress={handleCreateStore}
         loading={loading}
-        style={styles.button}
-      >
+        style={styles.button}>
         Create Store
       </Button>
     </View>
