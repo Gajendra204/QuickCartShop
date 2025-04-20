@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'https://quickcart-bdxm.onrender.com/api/shopkeeper';
+// const API_BASE_URL = 'https://quickcart-bdxm.onrender.com/api/shopkeeper';
+const API_BASE_URL = 'http://192.168.1.13:6000/api/shopkeeper';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -185,10 +186,20 @@ export const shopkeeperService = {
   // Order operations
   getAllOrders: async () => {
     try {
-      const response = await api.get('/orders');
+      console.log('Making GET request to /orders');
+      const token = await AsyncStorage.getItem('token');
+      console.log('Token available:', !!token); // Debug log
+      
+      const response = await api.get('/orders', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      console.log('Orders API raw response:', response.data);
       return response;
     } catch (error) {
-      handleApiError(error, 'Fetch orders failed');
+      console.error('getAllOrders error:', error);
       throw error;
     }
   },

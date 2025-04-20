@@ -10,6 +10,7 @@ import {
 } from 'react-native-paper';
 import {shopkeeperService} from '../services/api';
 import {Order} from '../types/order';
+import { useAuth } from '../context/AuthContext';
 
 const OrdersScreen = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -32,16 +33,37 @@ const OrdersScreen = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      console.log('Fetching orders...'); // Debug log
+      
       const response = await shopkeeperService.getAllOrders();
-
-      if (response && Array.isArray(response.data)) {
+      console.log('Raw API Response:', JSON.stringify(response, null, 2)); // Full response
+      
+      if (!response) {
+        console.error('No response received from API');
+        Alert.alert('Error', 'No response from server');
+        return;
+      }
+  
+      if (!response.data) {
+        console.error('Response missing data property:', response);
+        Alert.alert('Error', 'Invalid response format');
+        return;
+      }
+  
+      if (Array.isArray(response.data)) {
+        console.log('Number of orders received:', response.data.length);
         setOrders(response.data);
       } else {
-        console.error('Invalid response:', response);
-        Alert.alert('Error', 'Invalid data received from server');
+        console.error('Response data is not an array:', typeof response.data);
+        Alert.alert('Error', 'Invalid data format received');
       }
     } catch (error: any) {
-      console.error('Fetch orders failed:', error.message || error);
+      console.error('Fetch orders error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        stack: error.stack
+      });
       Alert.alert('Error', 'Failed to fetch orders');
     } finally {
       setLoading(false);
@@ -120,16 +142,29 @@ const OrdersScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={orders}
-        renderItem={renderOrderItem}
-        keyExtractor={item => item._id}
-        refreshing={refreshing}
-        onRefresh={() => {
-          setRefreshing(true);
-          fetchOrders();
-        }}
-      />
+      {orders.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Title>No Orders Found</Title>
+          <Button 
+            mode="contained" 
+            onPress={fetchOrders}
+            style={styles.refreshButton}
+          >
+            Refresh Orders
+          </Button>
+        </View>
+      ) : (
+        <FlatList
+          data={orders}
+          renderItem={renderOrderItem}
+          keyExtractor={item => item._id}
+          refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            fetchOrders();
+          }}
+        />
+      )}
     </View>
   );
 };
@@ -160,6 +195,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  refreshButton: {
+    marginTop: 20,
   },
 });
 

@@ -1,9 +1,23 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Button, Card, Title} from 'react-native-paper';
+import {useAuth} from '../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardScreen = ({navigation}: any) => {
+  const {logout} = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Login'}],
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
   return (
     <View style={styles.container}>
       <Title style={styles.title}>Shopkeeper Dashboard</Title>
@@ -49,20 +63,7 @@ const DashboardScreen = ({navigation}: any) => {
         View Orders
       </Button>
 
-      <Button
-        mode="outlined"
-        onPress={async () => {
-          try {
-            await AsyncStorage.removeItem('token');
-            navigation.reset({
-              index: 0,
-              routes: [{name: 'Login'}],
-            });
-          } catch (error) {
-            console.error('Error during logout:', error);
-          }
-        }}
-        style={styles.button}>
+      <Button mode="outlined" onPress={handleLogout} style={styles.button}>
         Logout
       </Button>
     </View>
