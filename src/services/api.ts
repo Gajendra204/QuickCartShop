@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const API_BASE_URL = 'https://quickcart-bdxm.onrender.com/api/shopkeeper';
-const API_BASE_URL = 'http://192.168.1.13:6000/api/shopkeeper';
+const API_BASE_URL = 'http://localhost:6000/api/shopkeeper';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
