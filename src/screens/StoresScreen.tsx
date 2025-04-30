@@ -1,69 +1,88 @@
 import React, {useEffect, useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import {
-  Card,
-  Title,
-  Paragraph,
-  ActivityIndicator,
-  Button,
-} from 'react-native-paper';
+import {View, StyleSheet, FlatList, Alert, TouchableOpacity} from 'react-native';
+import {Card, Title, Paragraph, ActivityIndicator, Button, Portal, Dialog, TextInput} from 'react-native-paper';
 import {shopkeeperService} from '../services/api';
-import {useNavigation} from '@react-navigation/native';
 
 type Store = {
   _id: string;
   name: string;
   address: string;
-  barcodeImage?: string;
 };
 
-const StoresScreen = () => {
+const StoresScreen = ({navigation}: any) => {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const [editDialogVisible, setEditDialogVisible] = useState(false);
+  const [editingStore, setEditingStore] = useState<Store | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editAddress, setEditAddress] = useState('');
 
   useEffect(() => {
-    const fetchStores = async () => {
-      try {
-        const response = await shopkeeperService.getStores();
-        setStores(response.data);
-      } catch (error) {
-        console.error('Error fetching stores:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStores();
   }, []);
 
-  // const handleDeleteStore = async (storeId: string) => {
-  //   Alert.alert(
-  //     'Delete Store',
-  //     'Are you sure you want to delete this store and all its contents?',
-  //     [
-  //       {text: 'Cancel', style: 'cancel'},
-  //       {
-  //         text: 'Delete',
-  //         style: 'destructive',
-  //         onPress: async () => {
-  //           try {
-  //             await shopkeeperService.deleteStore(storeId);
-  //             setStores(stores.filter(store => store._id !== storeId));
-  //           } catch (error) {
-  //             Alert.alert('Error', 'Failed to delete store');
-  //           }
-  //         },
-  //       },
-  //     ],
-  //   );
-  // };
+  const fetchStores = async () => {
+    try {
+      const response = await shopkeeperService.getStores();
+      setStores(response.data);
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteStore = async (storeId: string) => {
+    Alert.alert(
+      'Delete Store',
+      'Are you sure you want to delete this store and all its contents?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await shopkeeperService.deleteStore(storeId);
+              setStores(stores.filter(store => store._id !== storeId));
+              Alert.alert('Success', 'Store deleted successfully');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete store');
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const handleEditStore = (store: Store) => {
+    setEditingStore(store);
+    setEditName(store.name);
+    setEditAddress(store.address);
+    setEditDialogVisible(true);
+  };
+
+  const handleUpdateStore = async () => {
+    if (!editingStore) return;
+
+    try {
+      await shopkeeperService.updateStore(editingStore._id, {
+        name: editName,
+        address: editAddress,
+      });
+      
+      setStores(stores.map(store => 
+        store._id === editingStore._id 
+          ? {...store, name: editName, address: editAddress}
+          : store
+      ));
+      
+      Alert.alert('Success', 'Store updated successfully');
+      setEditDialogVisible(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update store');
+    }
+  };
 
   const navigateToCategories = (storeId: string, storeName: string) => {
     navigation.navigate('Categories', {storeId, storeName});
@@ -77,29 +96,7 @@ const StoresScreen = () => {
     );
   }
 
-  // const renderStoreItem = ({item}: {item: Store}) => (
-  //   <Card style={styles.card}>
-  //     <Card.Content>
-  //       <View style={styles.row}>
-  //         <View style={styles.infoContainer}>
-  //           <Title>{item.name}</Title>
-  //           <Paragraph>{item.address}</Paragraph>
-  //         </View>
-  //         <Button
-  //           mode="text"
-  //           icon="delete"
-  //           onPress={() => handleDeleteStore(item._id)}
-  //           style={styles.deleteButton}
-  //           textColor="#d32f2f">
-  //           Delete
-  //         </Button>
-  //       </View>
-  //     </Card.Content>
-  //   </Card>
-  // );
-
   return (
-    
     <View style={styles.container}>
       <Title style={styles.title}>Your Stores</Title>
       <FlatList
@@ -110,13 +107,58 @@ const StoresScreen = () => {
             onPress={() => navigateToCategories(item._id, item.name)}>
             <Card style={styles.card}>
               <Card.Content>
-                <Title>{item.name}</Title>
-                <Paragraph>{item.address}</Paragraph>
+                <View style={styles.row}>
+                  <View style={styles.infoContainer}>
+                    <Title>{item.name}</Title>
+                    <Paragraph>{item.address}</Paragraph>
+                  </View>
+                  <View style={styles.buttonContainer}>
+                    <Button
+                      icon="pencil"
+                      mode="text"
+                      onPress={() => handleEditStore(item)}
+                      style={styles.actionButton}>
+                      Edit
+                    </Button>
+                    <Button
+                      icon="delete"
+                      mode="text"
+                      onPress={() => handleDeleteStore(item._id)}
+                      style={styles.actionButton}
+                      textColor="#d32f2f">
+                      Delete
+                    </Button>
+                  </View>
+                </View>
               </Card.Content>
             </Card>
           </TouchableOpacity>
         )}
       />
+
+      <Portal>
+        <Dialog visible={editDialogVisible} onDismiss={() => setEditDialogVisible(false)}>
+          <Dialog.Title>Edit Store</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Store Name"
+              value={editName}
+              onChangeText={setEditName}
+              style={styles.input}
+            />
+            <TextInput
+              label="Address"
+              value={editAddress}
+              onChangeText={setEditAddress}
+              style={styles.input}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setEditDialogVisible(false)}>Cancel</Button>
+            <Button onPress={handleUpdateStore}>Save</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 };
@@ -140,17 +182,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // row: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-between',
-  //   alignItems: 'center',
-  // },
-  // infoContainer: {
-  //   flex: 1,
-  // },
-  // deleteButton: {
-  //   alignSelf: 'flex-end',
-  // },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  infoContainer: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    marginLeft: 8,
+  },
+  input: {
+    marginBottom: 10,
+  },
 });
 
 export default StoresScreen;

@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const API_BASE_URL = 'https://quickcart-bdxm.onrender.com/api/shopkeeper';
-const API_BASE_URL = 'http://localhost:6000/api/shopkeeper';
+const API_BASE_URL = 'http://192.168.13.222:6000/api/shopkeeper';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -94,6 +94,27 @@ export const shopkeeperService = {
     }
   },
 
+  updateStore: async (storeId: string, data: { name: string; address: string }) => {
+    try {
+      // Add shopkeeper data to the update request
+      const response = await api.put(`/stores/${storeId}`, data);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Update store failed');
+      throw error;
+    }
+  },
+
+  deleteStore: async (storeId: string) => {
+    try {
+      const response = await api.delete(`/stores/${storeId}`);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Delete store failed');
+      throw error;
+    }
+  },
+
   // Category operations
   createCategory: async (data: { name: string; store: string }) => {
     try {
@@ -131,6 +152,26 @@ export const shopkeeperService = {
       return response;
     } catch (error) {
       handleApiError(error, 'Fetch categories by store failed');
+      throw error;
+    }
+  },
+
+  updateCategory: async (categoryId: string, data: { name: string; store: string }) => {
+    try {
+      const response = await api.put(`/categories/${categoryId}`, data);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Update category failed');
+      throw error;
+    }
+  },
+
+  deleteCategory: async (categoryId: string) => {
+    try {
+      const response = await api.delete(`/categories/${categoryId}`);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Delete category failed');
       throw error;
     }
   },
@@ -183,6 +224,33 @@ export const shopkeeperService = {
     }
   },
 
+  updateItem: async (itemId: string, data: {
+    name: string;
+    description: string;
+    mrp: number;
+    discount: number;
+    category: string;
+    store: string;
+  }) => {
+    try {
+      const response = await api.put(`/items/${itemId}`, data);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Update item failed');
+      throw error;
+    }
+  },
+
+  deleteItem: async (itemId: string) => {
+    try {
+      const response = await api.delete(`/items/${itemId}`);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Delete item failed');
+      throw error;
+    }
+  },
+
   // Order operations
   getAllOrders: async () => {
     try {
@@ -225,36 +293,6 @@ export const shopkeeperService = {
       throw error;
     }
   },
-
-//   deleteStore: async (storeId: string) => {
-//     try {
-//       const response = await api.delete(`/stores/${storeId}`);
-//       return response;
-//     } catch (error) {
-//       handleApiError(error, 'Delete store failed');
-//       throw error;
-//     }
-//   },
-
-//   deleteCategory: async (categoryId: string) => {
-//     try {
-//       const response = await api.delete(`/categories/${categoryId}`);
-//       return response;
-//     } catch (error) {
-//       handleApiError(error, 'Delete category failed');
-//       throw error;
-//     }
-//   },
-
-//   deleteItem: async (itemId: string) => {
-//     try {
-//       const response = await api.delete(`/items/${itemId}`);
-//       return response;
-//     } catch (error) {
-//       handleApiError(error, 'Delete item failed');
-//       throw error;
-//     }
-//   },
  };
 
 // Helper function for consistent error handling
