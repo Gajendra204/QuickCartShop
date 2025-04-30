@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { Card, Title, ActivityIndicator, Button, Portal, Dialog, TextInput } from 'react-native-paper';
-import { shopkeeperService } from '../services/api';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackNavigationProp, RootStackParamList } from '../types/navigation';
-import { RootStackRouteProp } from '../types/navigation';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import {
+  Card,
+  Title,
+  ActivityIndicator,
+  Button,
+  Portal,
+  Dialog,
+  TextInput,
+} from 'react-native-paper';
+import {shopkeeperService} from '../services/api';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackNavigationProp, RootStackParamList} from '../types/navigation';
+import {RootStackRouteProp} from '../types/navigation';
 
 type CategoriesScreenProps = {
   route: RootStackRouteProp<'Categories'>;
@@ -18,13 +32,13 @@ type Category = {
   store: string;
 };
 
-const CategoriesScreen = ({ navigation, route }: CategoriesScreenProps) => {
+const CategoriesScreen = ({navigation, route}: CategoriesScreenProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editName, setEditName] = useState('');
-  const { storeId, storeName } = route.params;
+  const {storeId, storeName} = route.params;
 
   useEffect(() => {
     fetchCategories();
@@ -46,7 +60,7 @@ const CategoriesScreen = ({ navigation, route }: CategoriesScreenProps) => {
       'Delete Category',
       'Are you sure you want to delete this category and all its items?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete',
           style: 'destructive',
@@ -79,11 +93,13 @@ const CategoriesScreen = ({ navigation, route }: CategoriesScreenProps) => {
         store: storeId,
       });
 
-      setCategories(categories.map(category =>
-        category._id === editingCategory._id
-          ? { ...category, name: editName }
-          : category
-      ));
+      setCategories(
+        categories.map(category =>
+          category._id === editingCategory._id
+            ? {...category, name: editName}
+            : category,
+        ),
+      );
 
       Alert.alert('Success', 'Category updated successfully');
       setEditDialogVisible(false);
@@ -115,8 +131,9 @@ const CategoriesScreen = ({ navigation, route }: CategoriesScreenProps) => {
       <FlatList
         data={categories}
         keyExtractor={item => item._id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigateToItems(item._id, item.name)}>
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() => navigateToItems(item._id, item.name)}>
             <Card style={styles.card}>
               <Card.Content>
                 <View style={styles.row}>
@@ -148,7 +165,9 @@ const CategoriesScreen = ({ navigation, route }: CategoriesScreenProps) => {
       />
 
       <Portal>
-        <Dialog visible={editDialogVisible} onDismiss={() => setEditDialogVisible(false)}>
+        <Dialog
+          visible={editDialogVisible}
+          onDismiss={() => setEditDialogVisible(false)}>
           <Dialog.Title>Edit Category</Dialog.Title>
           <Dialog.Content>
             <TextInput

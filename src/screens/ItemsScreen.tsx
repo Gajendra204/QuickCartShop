@@ -1,8 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
-import { Card, Title, Paragraph, ActivityIndicator, Button, Portal, Dialog, TextInput } from 'react-native-paper';
-import { shopkeeperService } from '../services/api';
-import { RootStackRouteProp, RootStackNavigationProp } from '../types/navigation';
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, FlatList, Alert} from 'react-native';
+import {
+  Card,
+  Title,
+  Paragraph,
+  ActivityIndicator,
+  Button,
+  Portal,
+  Dialog,
+  TextInput,
+} from 'react-native-paper';
+import {shopkeeperService} from '../services/api';
+import {RootStackRouteProp, RootStackNavigationProp} from '../types/navigation';
 
 type ItemsScreenProps = {
   route: RootStackRouteProp<'Items'>;
@@ -20,7 +29,7 @@ type Item = {
   image?: string;
 };
 
-const ItemsScreen = ({ navigation, route }: ItemsScreenProps) => {
+const ItemsScreen = ({navigation, route}: ItemsScreenProps) => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -30,7 +39,7 @@ const ItemsScreen = ({ navigation, route }: ItemsScreenProps) => {
   const [editMrp, setEditMrp] = useState('');
   const [editDiscount, setEditDiscount] = useState('');
 
-  const { categoryId, categoryName, storeId, storeName } = route.params;
+  const {categoryId, categoryName, storeId, storeName} = route.params;
 
   useEffect(() => {
     fetchItems();
@@ -48,26 +57,22 @@ const ItemsScreen = ({ navigation, route }: ItemsScreenProps) => {
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    Alert.alert(
-      'Delete Item',
-      'Are you sure you want to delete this item?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await shopkeeperService.deleteItem(itemId);
-              setItems(items.filter(item => item._id !== itemId));
-              Alert.alert('Success', 'Item deleted successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete item');
-            }
-          },
+    Alert.alert('Delete Item', 'Are you sure you want to delete this item?', [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await shopkeeperService.deleteItem(itemId);
+            setItems(items.filter(item => item._id !== itemId));
+            Alert.alert('Success', 'Item deleted successfully');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to delete item');
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleEditItem = (item: Item) => {
@@ -94,11 +99,11 @@ const ItemsScreen = ({ navigation, route }: ItemsScreenProps) => {
 
       await shopkeeperService.updateItem(editingItem._id, updatedItem);
 
-      setItems(items.map(item =>
-        item._id === editingItem._id
-          ? { ...item, ...updatedItem }
-          : item
-      ));
+      setItems(
+        items.map(item =>
+          item._id === editingItem._id ? {...item, ...updatedItem} : item,
+        ),
+      );
 
       Alert.alert('Success', 'Item updated successfully');
       setEditDialogVisible(false);
@@ -122,8 +127,8 @@ const ItemsScreen = ({ navigation, route }: ItemsScreenProps) => {
       </Title>
       <FlatList
         data={items}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
+        keyExtractor={item => item._id}
+        renderItem={({item}) => (
           <Card style={styles.card}>
             <Card.Content>
               <View style={styles.row}>
@@ -159,7 +164,9 @@ const ItemsScreen = ({ navigation, route }: ItemsScreenProps) => {
       />
 
       <Portal>
-        <Dialog visible={editDialogVisible} onDismiss={() => setEditDialogVisible(false)}>
+        <Dialog
+          visible={editDialogVisible}
+          onDismiss={() => setEditDialogVisible(false)}>
           <Dialog.Title>Edit Item</Dialog.Title>
           <Dialog.Content>
             <TextInput

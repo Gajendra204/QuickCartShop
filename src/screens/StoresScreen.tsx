@@ -1,6 +1,21 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, FlatList, Alert, TouchableOpacity} from 'react-native';
-import {Card, Title, Paragraph, ActivityIndicator, Button, Portal, Dialog, TextInput} from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
+import {
+  Card,
+  Title,
+  Paragraph,
+  ActivityIndicator,
+  Button,
+  Portal,
+  Dialog,
+  TextInput,
+} from 'react-native-paper';
 import {shopkeeperService} from '../services/api';
 
 type Store = {
@@ -70,13 +85,15 @@ const StoresScreen = ({navigation}: any) => {
         name: editName,
         address: editAddress,
       });
-      
-      setStores(stores.map(store => 
-        store._id === editingStore._id 
-          ? {...store, name: editName, address: editAddress}
-          : store
-      ));
-      
+
+      setStores(
+        stores.map(store =>
+          store._id === editingStore._id
+            ? {...store, name: editName, address: editAddress}
+            : store,
+        ),
+      );
+
       Alert.alert('Success', 'Store updated successfully');
       setEditDialogVisible(false);
     } catch (error) {
@@ -137,7 +154,9 @@ const StoresScreen = ({navigation}: any) => {
       />
 
       <Portal>
-        <Dialog visible={editDialogVisible} onDismiss={() => setEditDialogVisible(false)}>
+        <Dialog
+          visible={editDialogVisible}
+          onDismiss={() => setEditDialogVisible(false)}>
           <Dialog.Title>Edit Store</Dialog.Title>
           <Dialog.Content>
             <TextInput
