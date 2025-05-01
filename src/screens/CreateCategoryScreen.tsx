@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { Button, TextInput, Title } from 'react-native-paper';
-import { shopkeeperService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { Picker } from '@react-native-picker/picker';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, Alert} from 'react-native';
+import {Button, TextInput, Title} from 'react-native-paper';
+import {shopkeeperService} from '../services/api';
+import {useAuth} from '../context/AuthContext';
+import {Picker} from '@react-native-picker/picker';
 
 interface Store {
   _id: string;
   name: string;
 }
 
-const CreateCategoryScreen = ({ navigation, route }: any) => {
+const CreateCategoryScreen = ({navigation, route}: any) => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState('');
-  const { userId } = useAuth();
+  const {userId} = useAuth();
 
   useEffect(() => {
     fetchStores();
@@ -81,11 +81,7 @@ const CreateCategoryScreen = ({ navigation, route }: any) => {
           onValueChange={itemValue => setSelectedStore(itemValue)}
           style={styles.picker}>
           {stores.map(store => (
-            <Picker.Item
-              key={store._id}
-              label={store.name}
-              value={store._id}
-            />
+            <Picker.Item key={store._id} label={store.name} value={store._id} />
           ))}
         </Picker>
       </View>

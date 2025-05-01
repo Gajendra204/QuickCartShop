@@ -157,11 +157,7 @@ const CreateItemScreen = ({navigation}: any) => {
           onValueChange={itemValue => setSelectedStore(itemValue)}
           style={styles.picker}>
           {stores.map(store => (
-            <Picker.Item
-              key={store._id}
-              label={store.name}
-              value={store._id}
-            />
+            <Picker.Item key={store._id} label={store.name} value={store._id} />
           ))}
         </Picker>
       </View>
