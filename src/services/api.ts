@@ -63,6 +63,16 @@ export const shopkeeperService = {
     }
   },
 
+  forgotPassword: async (data: { email: string }) => {
+    try {
+      const response = await api.post('/forgot-password', data);
+      return response;
+    } catch (error) {
+      handleApiError(error, 'Password reset request failed');
+      throw error;
+    }
+  },
+
   // Store operations
   createStore: async (data: { name: string; address: string; shopkeeper: { id: string } }) => {
     try {
@@ -300,16 +310,9 @@ function handleApiError(error: unknown, defaultMessage: string) {
   console.error(defaultMessage, error);
   
   if (axios.isAxiosError(error)) {
-    console.error("Axios error details:", {
-      message: error.message,
-      code: error.code,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    
-    // You could add additional handling based on status code
     if (error.response?.status === 401) {
-      console.error("Authentication error - redirect to login");
+      console.error("Authentication error");
     }
   }
+  throw error;
 }

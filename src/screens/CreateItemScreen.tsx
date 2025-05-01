@@ -1,37 +1,142 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import {Button, TextInput, Title} from 'react-native-paper';
 import {shopkeeperService} from '../services/api';
+import {Picker} from '@react-native-picker/picker';
 
-const CreateItemScreen = ({navigation, route}: any) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [mrp, setMrp] = useState('');
-  const [discount, setDiscount] = useState('');
+interface Store {
+  _id: string;
+  name: string;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  store: string;
+}
+
+const CreateItemScreen = ({navigation}: any) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    mrp: '',
+    discount: '',
+  });
   const [loading, setLoading] = useState(false);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedStore, setSelectedStore] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const storeId = route.params?.storeId;
-  const categoryId = route.params?.categoryId;
+  useEffect(() => {
+    fetchStores();
+  }, []);
+
+  useEffect(() => {
+    if (selectedStore) {
+      fetchCategories(selectedStore);
+    }
+  }, [selectedStore]);
+
+  const fetchStores = async () => {
+    try {
+      const response = await shopkeeperService.getStores();
+      setStores(response.data);
+      if (response.data.length > 0) {
+        setSelectedStore(response.data[0]._id);
+      }
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+      Alert.alert('Error', 'Failed to fetch stores');
+    }
+  };
+
+  const fetchCategories = async (storeId: string) => {
+    setLoadingCategories(true);
+    try {
+      const response = await shopkeeperService.getCategoriesByStore(storeId);
+      setCategories(response.data);
+      if (response.data.length > 0) {
+        setSelectedCategory(response.data[0]._id);
+      } else {
+        setSelectedCategory('');
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      Alert.alert('Error', 'Failed to fetch categories');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const handleInputChange = (name: string, value: string) => {
+    setFormData(prev => ({...prev, [name]: value}));
+  };
+
+  const validateForm = () => {
+    if (!selectedStore) {
+      Alert.alert('Error', 'Please select a store');
+      return false;
+    }
+    if (!selectedCategory) {
+      Alert.alert('Error', 'Please select a category');
+      return false;
+    }
+    if (!formData.name) {
+      Alert.alert('Error', 'Please enter item name');
+      return false;
+    }
+    if (!formData.description) {
+      Alert.alert('Error', 'Please enter item description');
+      return false;
+    }
+    if (!formData.mrp || isNaN(Number(formData.mrp))) {
+      Alert.alert('Error', 'Please enter a valid MRP');
+      return false;
+    }
+    if (!formData.discount || isNaN(Number(formData.discount))) {
+      Alert.alert('Error', 'Please enter a valid discount');
+      return false;
+    }
+    if (Number(formData.discount) > Number(formData.mrp)) {
+      Alert.alert('Error', 'Discount cannot be greater than MRP');
+      return false;
+    }
+    return true;
+  };
 
   const handleCreateItem = async () => {
-    if (!name || !description || !mrp || !discount) {
-      Alert.alert('Error', 'Please fill all fields');
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
       await shopkeeperService.createItem({
-        name,
-        description,
-        mrp: parseFloat(mrp),
-        discount: parseFloat(discount),
-        category: categoryId,
-        store: storeId,
+        name: formData.name,
+        description: formData.description,
+        mrp: Number(formData.mrp),
+        discount: Number(formData.discount),
+        category: selectedCategory,
+        store: selectedStore,
       });
 
-      Alert.alert('Success', 'Item created successfully!');
-      navigation.navigate('Dashboard');
+      Alert.alert('Success', 'Item created successfully!', [
+        {
+          text: 'Create Another',
+          onPress: () => {
+            setFormData({
+              name: '',
+              description: '',
+              mrp: '',
+              discount: '',
+            });
+          },
+        },
+        {
+          text: 'View Items',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     } catch (error: any) {
       Alert.alert(
         'Error',
@@ -45,32 +150,70 @@ const CreateItemScreen = ({navigation, route}: any) => {
   return (
     <View style={styles.container}>
       <Title style={styles.title}>Create New Item</Title>
+
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedStore}
+          onValueChange={itemValue => setSelectedStore(itemValue)}
+          style={styles.picker}>
+          {stores.map(store => (
+            <Picker.Item
+              key={store._id}
+              label={store.name}
+              value={store._id}
+            />
+          ))}
+        </Picker>
+      </View>
+
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedCategory}
+          onValueChange={itemValue => setSelectedCategory(itemValue)}
+          style={styles.picker}
+          enabled={!loadingCategories}>
+          {categories.map(category => (
+            <Picker.Item
+              key={category._id}
+              label={category.name}
+              value={category._id}
+            />
+          ))}
+        </Picker>
+      </View>
+
       <TextInput
         label="Item Name"
-        value={name}
-        onChangeText={setName}
+        value={formData.name}
+        onChangeText={value => handleInputChange('name', value)}
         style={styles.input}
       />
+
       <TextInput
         label="Description"
-        value={description}
-        onChangeText={setDescription}
+        value={formData.description}
+        onChangeText={value => handleInputChange('description', value)}
+        multiline
+        numberOfLines={3}
         style={styles.input}
       />
+
       <TextInput
         label="MRP"
-        value={mrp}
-        onChangeText={setMrp}
-        keyboardType="numeric"
+        value={formData.mrp}
+        onChangeText={value => handleInputChange('mrp', value)}
+        keyboardType="decimal-pad"
         style={styles.input}
       />
+
       <TextInput
         label="Discount"
-        value={discount}
-        onChangeText={setDiscount}
-        keyboardType="numeric"
+        value={formData.discount}
+        onChangeText={value => handleInputChange('discount', value)}
+        keyboardType="decimal-pad"
         style={styles.input}
       />
+
       <Button
         mode="contained"
         onPress={handleCreateItem}
@@ -96,6 +239,15 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10,
+  },
+  pickerContainer: {
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+  },
+  picker: {
+    height: 50,
   },
 });
 

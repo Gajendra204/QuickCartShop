@@ -20,6 +20,7 @@ export type RootStackParamList = {
     Orders: undefined;
     Login: undefined;
     Register: undefined;
+    ForgotPassword: undefined;
   };
 
   export type MainTabParamList = {
