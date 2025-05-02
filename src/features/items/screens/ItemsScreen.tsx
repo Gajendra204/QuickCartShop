@@ -10,8 +10,11 @@ import {
   Dialog,
   TextInput,
 } from 'react-native-paper';
-import {shopkeeperService} from '../services/api';
-import {RootStackRouteProp, RootStackNavigationProp} from '../types/navigation';
+import {shopkeeperService} from '../../../services/api';
+import {
+  RootStackRouteProp,
+  RootStackNavigationProp,
+} from '../../../types/navigation';
 
 type ItemsScreenProps = {
   route: RootStackRouteProp<'Items'>;

@@ -3,54 +3,65 @@ import {
   View,
   StyleSheet,
   FlatList,
-  Alert,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {
   Card,
   Title,
-  Paragraph,
   ActivityIndicator,
   Button,
   Portal,
   Dialog,
   TextInput,
 } from 'react-native-paper';
-import {shopkeeperService} from '../services/api';
+import {shopkeeperService} from '../../../services/api';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {
+  RootStackNavigationProp,
+  RootStackParamList,
+} from '../../../types/navigation';
+import {RootStackRouteProp} from '../../../types/navigation';
 
-type Store = {
-  _id: string;
-  name: string;
-  address: string;
+type CategoriesScreenProps = {
+  route: RootStackRouteProp<'Categories'>;
+  navigation: RootStackNavigationProp<'Categories'>;
 };
 
-const StoresScreen = ({navigation}: any) => {
-  const [stores, setStores] = useState<Store[]>([]);
+type Category = {
+  _id: string;
+  name: string;
+  store: string;
+};
+
+const CategoriesScreen = ({navigation, route}: CategoriesScreenProps) => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
-  const [editingStore, setEditingStore] = useState<Store | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editName, setEditName] = useState('');
-  const [editAddress, setEditAddress] = useState('');
+  const {storeId, storeName} = route.params;
 
   useEffect(() => {
-    fetchStores();
-  }, []);
+    fetchCategories();
+  }, [storeId]);
 
-  const fetchStores = async () => {
+  const fetchCategories = async () => {
     try {
-      const response = await shopkeeperService.getStores();
-      setStores(response.data);
+      const response = await shopkeeperService.getCategoriesByStore(storeId);
+      setCategories(response.data);
     } catch (error) {
-      console.error('Error fetching stores:', error);
+      console.error('Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteStore = async (storeId: string) => {
+  const handleDeleteCategory = async (categoryId: string) => {
     Alert.alert(
-      'Delete Store',
-      'Are you sure you want to delete this store and all its contents?',
+      'Delete Category',
+      'Are you sure you want to delete this category and all its items?',
       [
         {text: 'Cancel', style: 'cancel'},
         {
@@ -58,11 +69,11 @@ const StoresScreen = ({navigation}: any) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await shopkeeperService.deleteStore(storeId);
-              setStores(stores.filter(store => store._id !== storeId));
-              Alert.alert('Success', 'Store deleted successfully');
+              await shopkeeperService.deleteCategory(categoryId);
+              setCategories(categories.filter(cat => cat._id !== categoryId));
+              Alert.alert('Success', 'Category deleted successfully');
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete store');
+              Alert.alert('Error', 'Failed to delete category');
             }
           },
         },
@@ -70,39 +81,43 @@ const StoresScreen = ({navigation}: any) => {
     );
   };
 
-  const handleEditStore = (store: Store) => {
-    setEditingStore(store);
-    setEditName(store.name);
-    setEditAddress(store.address);
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setEditName(category.name);
     setEditDialogVisible(true);
   };
 
-  const handleUpdateStore = async () => {
-    if (!editingStore) return;
+  const handleUpdateCategory = async () => {
+    if (!editingCategory) return;
 
     try {
-      await shopkeeperService.updateStore(editingStore._id, {
+      await shopkeeperService.updateCategory(editingCategory._id, {
         name: editName,
-        address: editAddress,
+        store: storeId,
       });
 
-      setStores(
-        stores.map(store =>
-          store._id === editingStore._id
-            ? {...store, name: editName, address: editAddress}
-            : store,
+      setCategories(
+        categories.map(category =>
+          category._id === editingCategory._id
+            ? {...category, name: editName}
+            : category,
         ),
       );
 
-      Alert.alert('Success', 'Store updated successfully');
+      Alert.alert('Success', 'Category updated successfully');
       setEditDialogVisible(false);
     } catch (error) {
-      Alert.alert('Error', 'Failed to update store');
+      Alert.alert('Error', 'Failed to update category');
     }
   };
 
-  const navigateToCategories = (storeId: string, storeName: string) => {
-    navigation.navigate('Categories', {storeId, storeName});
+  const navigateToItems = (categoryId: string, categoryName: string) => {
+    navigation.navigate('Items', {
+      categoryId,
+      categoryName,
+      storeId,
+      storeName,
+    });
   };
 
   if (loading) {
@@ -115,32 +130,31 @@ const StoresScreen = ({navigation}: any) => {
 
   return (
     <View style={styles.container}>
-      <Title style={styles.title}>Your Stores</Title>
+      <Title style={styles.title}>Categories in {storeName}</Title>
       <FlatList
-        data={stores}
+        data={categories}
         keyExtractor={item => item._id}
         renderItem={({item}) => (
           <TouchableOpacity
-            onPress={() => navigateToCategories(item._id, item.name)}>
+            onPress={() => navigateToItems(item._id, item.name)}>
             <Card style={styles.card}>
               <Card.Content>
                 <View style={styles.row}>
                   <View style={styles.infoContainer}>
                     <Title>{item.name}</Title>
-                    <Paragraph>{item.address}</Paragraph>
                   </View>
                   <View style={styles.buttonContainer}>
                     <Button
                       icon="pencil"
                       mode="text"
-                      onPress={() => handleEditStore(item)}
+                      onPress={() => handleEditCategory(item)}
                       style={styles.actionButton}>
                       Edit
                     </Button>
                     <Button
                       icon="delete"
                       mode="text"
-                      onPress={() => handleDeleteStore(item._id)}
+                      onPress={() => handleDeleteCategory(item._id)}
                       style={styles.actionButton}
                       textColor="#d32f2f">
                       Delete
@@ -157,24 +171,18 @@ const StoresScreen = ({navigation}: any) => {
         <Dialog
           visible={editDialogVisible}
           onDismiss={() => setEditDialogVisible(false)}>
-          <Dialog.Title>Edit Store</Dialog.Title>
+          <Dialog.Title>Edit Category</Dialog.Title>
           <Dialog.Content>
             <TextInput
-              label="Store Name"
+              label="Category Name"
               value={editName}
               onChangeText={setEditName}
-              style={styles.input}
-            />
-            <TextInput
-              label="Address"
-              value={editAddress}
-              onChangeText={setEditAddress}
               style={styles.input}
             />
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setEditDialogVisible(false)}>Cancel</Button>
-            <Button onPress={handleUpdateStore}>Save</Button>
+            <Button onPress={handleUpdateCategory}>Save</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -221,4 +229,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StoresScreen;
+export default CategoriesScreen;

@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import {Button, TextInput, Title} from 'react-native-paper';
-import {shopkeeperService} from '../services/api';
-import {useAuth} from '../context/AuthContext';
+import {shopkeeperService} from '../../../services/api';
+import {useAuth} from '../../../app/providers/AuthContext';
 import {Picker} from '@react-native-picker/picker';
 
 interface Store {

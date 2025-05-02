@@ -1,9 +1,8 @@
 // /src/context/AuthContext.tsx
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {shopkeeperService} from '../services/api';
-import { jwtDecode } from 'jwt-decode';
-
+import {shopkeeperService} from '../../services/api';
+import {jwtDecode} from 'jwt-decode';
 
 interface DecodedToken {
   id: string;
@@ -26,7 +25,6 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isAuthenticated = !!token;
-
 
   useEffect(() => {
     // Check for existing token on app load
@@ -88,7 +86,16 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
   };
 
   return (
-    <AuthContext.Provider value={{token, userId, isLoading, isAuthenticated, login, logout, register}}>
+    <AuthContext.Provider
+      value={{
+        token,
+        userId,
+        isLoading,
+        isAuthenticated,
+        login,
+        logout,
+        register,
+      }}>
       {children}
     </AuthContext.Provider>
   );

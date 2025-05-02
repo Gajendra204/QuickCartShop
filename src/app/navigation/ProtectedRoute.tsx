@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
 import {ActivityIndicator, View} from 'react-native';
-import {useAuth} from '../context/AuthContext';
+import {useAuth} from '../providers/AuthContext';
 import {useNavigation} from '@react-navigation/native';
-import {RootStackNavigationProp} from '../types/navigation';
+import {RootStackNavigationProp} from '../../types/navigation';
 
 const ProtectedRoute = ({children}: {children: React.ReactNode}) => {
   const {token, isLoading} = useAuth();

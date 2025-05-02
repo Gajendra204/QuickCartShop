@@ -1,49 +1,35 @@
 import React, {useState} from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import {Button, TextInput, Title} from 'react-native-paper';
-import {shopkeeperService} from '../services/api';
+import {useAuth} from '../../../app/providers/AuthContext';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../types/navigation';
+import {RootStackParamList} from '../../../types/navigation';
 
-type ForgotPasswordScreenProps = NativeStackScreenProps<
-  RootStackParamList,
-  'ForgotPassword'
->;
+type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
-  navigation,
-}) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const {login} = useAuth();
 
-  const handleResetPassword = async () => {
+  const handleLogin = async () => {
     if (!email || !email.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
+    if (!password) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+
     setLoading(true);
     try {
-      await shopkeeperService.forgotPassword({
-        email: email,
-      });
-
-      Alert.alert(
-        'Success',
-        'If an account exists with this email, you will receive password reset instructions.',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ],
-      );
+      await login(email, password);
     } catch (error: any) {
-      // Use a generic message for security
-      Alert.alert(
-        'Notice',
-        'If an account exists with this email, you will receive password reset instructions.',
-      );
+      const errorMessage = error.response?.data?.message || 'Login failed';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -51,7 +37,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <Title style={styles.title}>Reset Password</Title>
+      <Title style={styles.title}>Login to QuickCart</Title>
 
       <TextInput
         label="Email"
@@ -62,19 +48,34 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
         style={styles.input}
       />
 
+      <TextInput
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={styles.input}
+      />
+
+      <Button
+        mode="text"
+        onPress={() => navigation.navigate('ForgotPassword')}
+        style={styles.forgotPasswordButton}>
+        Forgot Password?
+      </Button>
+
       <Button
         mode="contained"
-        onPress={handleResetPassword}
+        onPress={handleLogin}
         loading={loading}
         style={styles.button}>
-        Reset Password
+        Login
       </Button>
 
       <Button
         mode="text"
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.navigate('Register')}
         style={styles.button}>
-        Back to Login
+        Don't have an account? Register
       </Button>
     </View>
   );
@@ -97,6 +98,10 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
   },
+  forgotPasswordButton: {
+    marginTop: 8,
+    alignSelf: 'flex-end',
+  },
 });
 
-export default ForgotPasswordScreen;
+export default LoginScreen;

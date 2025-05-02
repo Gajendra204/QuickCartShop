@@ -1,20 +1,17 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {useAuth} from '../context/AuthContext';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
-import DashboardScreen from '../screens/DashboardScreen';
-import CreateStoreScreen from '../screens/CreateStoreScreen';
-import CreateCategoryScreen from '../screens/CreateCategoryScreen';
-import CreateItemScreen from '../screens/CreateItemScreen';
-import OrdersScreen from '../screens/OrdersScreen';
-import StoresScreen from '../screens/StoresScreen';
-import CategoriesScreen from '../screens/CategoriesScreen';
-import ItemsScreen from '../screens/ItemsScreen';
+import {useAuth} from '../providers/AuthContext';
+import LoginScreen from '../../features/auth/screens/LoginScreen';
+import RegisterScreen from '../../features/auth/screens/RegisterScreen';
+import ForgotPasswordScreen from '../../features/auth/screens/ForgotPasswordScreen';
+import CategoriesScreen from '../../features/categories/screens/CategoriesScreen';
+import CreateCategoryScreen from '../../features/categories/screens/CreateCategoryScreen';
+import CreateItemScreen from '../../features/items/screens/CreateItemScreen';
+import ItemsScreen from '../../features/items/screens/ItemsScreen';
 import {ActivityIndicator, View} from 'react-native';
-import {RootStackParamList} from '../types/navigation';
+import {RootStackParamList} from '../../types/navigation';
+import BottomTabNavigator from './BottomTabNavigator';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -35,14 +32,9 @@ const RootNavigator = () => {
         {isAuthenticated ? (
           <>
             <Stack.Screen
-              name="Dashboard"
-              component={DashboardScreen}
+              name="MainTabs"
+              component={BottomTabNavigator}
               options={{headerShown: false}}
-            />
-            <Stack.Screen
-              name="Stores"
-              component={StoresScreen}
-              options={{title: 'Your Stores'}}
             />
             <Stack.Screen
               name="Categories"
@@ -59,11 +51,6 @@ const RootNavigator = () => {
               })}
             />
             <Stack.Screen
-              name="CreateStore"
-              component={CreateStoreScreen}
-              options={{title: 'Create New Store'}}
-            />
-            <Stack.Screen
               name="CreateCategory"
               component={CreateCategoryScreen}
               options={{title: 'Create New Category'}}
@@ -72,11 +59,6 @@ const RootNavigator = () => {
               name="CreateItem"
               component={CreateItemScreen}
               options={{title: 'Create New Item'}}
-            />
-            <Stack.Screen
-              name="Orders"
-              component={OrdersScreen}
-              options={{title: 'All Orders'}}
             />
           </>
         ) : (

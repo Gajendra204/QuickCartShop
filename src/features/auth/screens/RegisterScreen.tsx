@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import {Button, TextInput, Title} from 'react-native-paper';
-import {shopkeeperService} from '../services/api';
+import {shopkeeperService} from '../../../services/api';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../types/navigation';
+import {RootStackParamList} from '../../../types/navigation';
 
 type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
